@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rundown Peserta - Indonesia Open Event</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Sora:wght@400;600;700&display=swap');
+
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #D94C1A;
+            --secondary: #004E89;
+            --accent: #F7B32B;
+            --bg-light: #F8F9FA;
+            --bg-dark: #1a1a2e;
+            --text-dark: #333;
+            --text-light: #666;
+            --border-color: #e0e0e0;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --info: #3498db;
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-left: 6px solid var(--primary);
+        }
+
+        .header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .event-info {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-filter {
+            background: white;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+        }
+
+        .btn-filter.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Timeline/Schedule View */
+        .schedule-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .schedule-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border-top: 5px solid var(--primary);
+        }
+
+        .schedule-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .card-date {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-teams {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -42px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .timeline-item:last-child::after {
+            content: '';
+            position: absolute;
+            left: -37px;
+            top: 25px;
+            bottom: -20px;
+            width: 3px;
+            background: #ddd;
+        }
+
+        .timeline-time {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 3px;
+        }
+
+        .timeline-duration {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .timeline-description {
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .timeline-venue {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .venue-icon {
+            color: var(--secondary);
+        }
+
+        .timeline-detail {
+            background: var(--bg-light);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            border-left: 3px solid var(--info);
+        }
+
+        /* Table View */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 18px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 15px 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:hover {
+            background: var(--bg-light);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .time-cell {
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 120px;
+        }
+
+        .duration-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .team-badge {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Toggle Views */
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            width: fit-content;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            background: none;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* No Results */
+        .no-results {
+            background: white;
+            border-radius: 15px;
+            padding: 60px 40px;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .no-results h3 {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .schedule-card {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        .schedule-card:nth-child(1) { animation-delay: 0.1s; }
+        .schedule-card:nth-child(2) { animation-delay: 0.2s; }
+        .schedule-card:nth-child(3) { animation-delay: 0.3s; }
+        .schedule-card:nth-child(4) { animation-delay: 0.4s; }
+        .schedule-card:nth-child(5) { animation-delay: 0.5s; }
+        .schedule-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .event-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: auto;
+            }
+
+            .schedule-container {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 RUNDOWN PESERTA</h1>
+            <p>Jadwal Lengkap Event Indonesia Open 2026</p>
+            <div class="event-info">
+                <div class="info-item">
+                    <div class="info-icon">📅</div>
+                    <div>
+                        <strong>Tanggal</strong><br>
+                        2 - 7 Juni 2026
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">📍</div>
+                    <div>
+                        <strong>Lokasi</strong><br>
+                        Istora Senayan & Sekitarnya
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">👥</div>
+                    <div>
+                        <strong>Peserta</strong><br>
+                        6 Tim (Rundown: Ratusan Peserta)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Cari aktivitas, venue, atau tim...">
+            </div>
+            <div class="filter-group">
+                <button class="btn btn-filter active" data-date="all">Semua Hari</button>
+                <button class="btn btn-filter" data-date="2-4-juni">Selasa-Kamis (2-4)</button>
+                <button class="btn btn-filter" data-date="jumat">Jumat (5)</button>
+                <button class="btn btn-filter" data-date="5-6-juni">Jumat-Sabtu (5-6)</button>
+                <button class="btn btn-filter" data-date="minggu">Minggu (7)</button>
+            </div>
+        </div>
+
+        <div class="view-toggle">
+            <button class="toggle-btn active" id="cardViewBtn">📊 Card View</button>
+            <button class="toggle-btn" id="tableViewBtn">📋 Table View</button>
+        </div>
+
+        <div id="cardView" class="schedule-container"></div>
+        <div id="tableView" style="display: none;">
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <table id="scheduleTable">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Tanggal & Tim</th>
+                                <th>Waktu</th>
+                                <th>Durasi</th>
+                                <th>Aktivitas</th>
+                                <th>Lokasi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <h3>Tidak ada hasil</h3>
+            <p>Coba ubah filter atau pencarian Anda</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 lumina Event | Rundown Indonesia Open</p>
+        </div>
+    </div>
+
+    <script>
+        const eventData = [
+            // SELASA-KAMIS, 2-4 JUNI
+            {
+                date: "2-4-juni",
+                dateDisplay: "Selasa-Kamis, 2-4 Juni 2026",
+                teams: "Tim 1 & 2",
+                schedule: [
+                    { no: 1, time: "11:00", endTime: "11:00", duration: "00:00", activity: "Peserta tiba di Venue", venue: "Ranch Market - Foodcourt", detail: "" },
+                    { no: 2, time: "11:00", endTime: "11:40", duration: "00:40", activity: "PREPARATION (packing barang, ganti, dandan, makan)", venue: "Ranch Market - Foodcourt", detail: "Peserta diminta packing barang, dan memasukkan kedalam plastik besar, diberi label dan diikat. Perwakilan peserta meletakkan di tenda eo." },
+                    { no: 3, time: "11:40", endTime: "12:00", duration: "00:20", activity: "FOTO TEAM, FLASHMOB, Seru seruan di BOOTH DF", venue: "Booth DF", detail: "FOTO team didepan booth, pembuatan konten reel - Flash mob kicau mania, mencoba photobooth dan bermain game dibooth." },
+                    { no: 4, time: "12:00", endTime: "14:00", duration: "02:00", activity: "PERFORM", venue: "Istora Senayan", detail: "perform didalam istora, sesuai dengan regulasi (do & don't) dengan waktu bersih 2 jam." },
+                    { no: 5, time: "14:00", endTime: "14:20", duration: "00:20", activity: "MERAMAIKAN EVENT PIO 2026", venue: "Booth DF / Booth Polytron / Stage Entertainment", detail: "Team keluar dari Istora, dan meramaikan event Indo Open" },
+                    { no: 6, time: "14:20", endTime: "15:00", duration: "00:40", activity: "Rehat, Ganti, Makan, dan MENINGGALKAN ISTORA SENAYAN", venue: "Ranch Market - Foodcourt", detail: "Peserta sudah bisa mengambil barang, melepas kostum & makeup, makan, dan bisa meninggalkan Istora Senayan" },
+                ]
+            },
+            {
+                date: "2-4-juni",
+                dateDisplay: "Selasa-Kamis, 2-4 Juni 2026",
+                teams: "Tim 3 & 4",
+                schedule: [
+                    { no: 1, time: "14:00", endTime: "14:00", duration: "00:00", activity: "Peserta tiba di Venue", venue: "Ranch Market - Foodcourt", detail: "" },
+                    { no: 2, time: "14:00", endTime: "14:40", duration: "00:40", activity: "PREPARATION (packing barang, ganti, dandan, makan)", venue: "Ranch Market - Foodcourt", detail: "Peserta diminta packing barang, dan memasukkan kedalam plastik besar, diberi label dan diikat." },
+                    { no: 3, time: "14:40", endTime: "15:00", duration: "00:20", activity: "FOTO TEAM, FLASHMOB, Seru seruan di BOOTH DF", venue: "Booth DF", detail: "FOTO team didepan booth, pembuatan konten reel - Flash mob kicau mania" },
+                    { no: 4, time: "15:00", endTime: "17:00", duration: "02:00", activity: "PERFORM", venue: "Istora Senayan", detail: "perform didalam istora, sesuai dengan regulasi dengan waktu bersih 2 jam." },
+                    { no: 5, time: "17:00", endTime: "17:20", duration: "00:20", activity: "MERAMAIKAN EVENT PIO 2026", venue: "Booth DF / Booth Polytron / Stage Entertainment", detail: "Team keluar dari Istora, dan meramaikan event Indo Open" },
+                    { no: 6, time: "17:20", endTime: "18:00", duration: "00:40", activity: "Rehat, Ganti, Makan, dan MENINGGALKAN ISTORA SENAYAN", venue: "Ranch Market - Foodcourt", detail: "Peserta sudah bisa mengambil barang, melepas kostum & makeup, makan" },
+                ]
+            },
+            {
+                date: "2-4-juni",
+                dateDisplay: "Selasa-Kamis, 2-4 Juni 2026",
+                teams: "Tim 5 & 6",
+                schedule: [
+                    { no: 1, time: "17:00", endTime: "17:00", duration: "00:00", activity: "Peserta tiba di Venue", venue: "Ranch Market - Foodcourt", detail: "" },
+                    { no: 2, time: "17:00", endTime: "17:40", duration: "00:40", activity: "PREPARATION (packing barang, ganti, dandan, makan)", venue: "Ranch Market - Foodcourt", detail: "Peserta diminta packing barang, dan memasukkan kedalam plastik besar" },
+                    { no: 3, time: "17:40", endTime: "18:00", duration: "00:20", activity: "FOTO TEAM, FLASHMOB, Seru seruan di BOOTH DF", venue: "Booth DF", detail: "FOTO team didepan booth, pembuatan konten reel - Flash mob" },
+                    { no: 4, time: "18:00", endTime: "20:00", duration: "02:00", activity: "PERFORM", venue: "Istora Senayan", detail: "perform didalam istora dengan waktu bersih 2 jam." },
+                    { no: 5, time: "20:00", endTime: "20:20", duration: "00:20", activity: "MERAMAIKAN EVENT PIO 2026", venue: "Booth DF / Booth Polytron / Stage Entertainment", detail: "Team keluar dari Istora, dan meramaikan event Indo Open" },
+                    { no: 6, time: "20:20", endTime: "21:00", duration: "00:40", activity: "Rehat, Ganti, Makan, dan MENINGGALKAN ISTORA SENAYAN", venue: "Ranch Market - Foodcourt", detail: "Peserta sudah bisa mengambil barang, melepas kostum & makeup" },
+                ]
+            },
+            // JUMAT, 5 JUNI
+            {
+                date: "jumat",
+                dateDisplay: "Jumat, 5 Juni 2026",
+                teams: "8 Besar",
+                schedule: [
+                    { no: 1, time: "09:00", endTime: "09:20", duration: "00:20", activity: "Peserta tiba di Venue", venue: "Ranch Market - Foodcourt", detail: "" },
+                    { no: 2, time: "09:20", endTime: "10:05", duration: "00:45", activity: "PREPARATION (packing barang, ganti, dandan, makan)", venue: "Ranch Market - Foodcourt", detail: "Peserta diminta packing barang, dan memasukkan kedalam plastik besar" },
+                    { no: 3, time: "10:05", endTime: "10:15", duration: "00:10", activity: "ICE BREAKING", venue: "Stage Entertainment", detail: "Membariskan peserta, Yel - yel peserta" },
+                    { no: 4, time: "10:15", endTime: "10:45", duration: "00:30", activity: "CEREMONY AWARDING", venue: "Stage Entertainment", detail: "Ceremony awarding, sesuai dengan rundown, dan script" },
+                    { no: 5, time: "10:45", endTime: "11:00", duration: "00:15", activity: "FOTO BERSAMA", venue: "Stage Entertainment - Booth DF", detail: "FOTO seluruh pemenang didepan stage, dan didepan booth DF" },
+                    { no: 6, time: "11:00", endTime: "11:10", duration: "00:10", activity: "BRIEFING 8 BESAR & DRAWING", venue: "Ranch Market - Foodcourt", detail: "Briefing pemenang untuk pengambilan hadiah, dan diskusi jadwal perform" },
+                    { no: 7, time: "11:10", endTime: "12:50", duration: "01:40", activity: "Rehat, Ganti, Makan, dan Sholat Jum'at", venue: "Ranch Market - Foodcourt", detail: "Peserta sudah bisa mengambil barang, melepas kostum & makeup, makan, dan bisa istirahat / sholat Jum'at" },
+                ]
+            },
+            // JUMAT-SABTU, 5-6 JUNI
+            {
+                date: "5-6-juni",
+                dateDisplay: "Jumat-Sabtu, 5-6 Juni 2026",
+                teams: "Tim 1 & 2",
+                schedule: [
+                    { no: 1, time: "13:00", endTime: "13:00", duration: "00:00", activity: "Peserta tiba di Venue", venue: "Ranch Market - Foodcourt", detail: "" },
+                    { no: 2, time: "13:00", endTime: "13:40", duration: "00:40", activity: "PREPARATION (packing barang, ganti, dandan, makan)", venue: "Ranch Market - Foodcourt", detail: "Peserta diminta packing barang, dan memasukkan kedalam plastik besar" },
+                    { no: 3, time: "13:40", endTime: "14:00", duration: "00:20", activity: "FOTO TEAM, FLASHMOB, Seru seruan di BOOTH DF", venue: "Booth DF", detail: "FOTO team didepan booth, pembuatan konten reel - Flash mob" },
+                    { no: 4, time: "14:00", endTime: "16:00", duration: "02:00", activity: "PERFORM", venue: "Istora Senayan", detail: "perform didalam istora dengan waktu bersih 2 jam." },
+                    { no: 5, time: "16:00", endTime: "16:20", duration: "00:20", activity: "MERAMAIKAN EVENT PIO 2026", venue: "Booth DF / Booth Polytron / Stage Entertainment", detail: "Team keluar dari Istora, dan meramaikan event Indo Open" },
+                    { no: 6, time: "16:20", endTime: "17:00", duration: "00:40", activity: "Rehat, Ganti, Makan, dan MENINGGALKAN ISTORA SENAYAN", venue: "Ranch Market - Foodcourt", detail: "Peserta sudah bisa mengambil barang, melepas kostum & makeup" },
+                ]
+            },
+            {
+                date: "5-6-juni",
+                dateDisplay: "Jumat-Sabtu, 5-6 Juni 2026",
+                teams: "Tim 5 & 6",
+                schedule: [
+                    { no: 1, time: "16:00", endTime: "16:00", duration: "00:00", activity: "Peserta tiba di Venue", venue: "Ranch Market - Foodcourt", detail: "" },
+                    { no: 2, time: "16:00", endTime: "16:40", duration: "00:40", activity: "PREPARATION (packing barang, ganti, dandan, makan)", venue: "Ranch Market - Foodcourt", detail: "Peserta diminta packing barang, dan memasukkan kedalam plastik besar" },
+                    { no: 3, time: "16:40", endTime: "17:00", duration: "00:20", activity: "FOTO TEAM, FLASHMOB, Seru seruan di BOOTH DF", venue: "Booth DF", detail: "FOTO team didepan booth, pembuatan konten reel - Flash mob" },
+                    { no: 4, time: "17:00", endTime: "19:00", duration: "02:00", activity: "PERFORM", venue: "Istora Senayan", detail: "perform didalam istora dengan waktu bersih 2 jam." },
+                    { no: 5, time: "19:00", endTime: "19:20", duration: "00:20", activity: "MERAMAIKAN EVENT PIO 2026", venue: "Booth DF / Booth Polytron / Stage Entertainment", detail: "Team keluar dari Istora, dan meramaikan event Indo Open" },
+                    { no: 6, time: "19:20", endTime: "20:00", duration: "00:40", activity: "Rehat, Ganti, Makan, dan MENINGGALKAN ISTORA SENAYAN", venue: "Ranch Market - Foodcourt", detail: "Peserta sudah bisa mengambil barang, melepas kostum & makeup" },
+                ]
+            },
+            // MINGGU, 7 JUNI
+            {
+                date: "minggu",
+                dateDisplay: "Minggu, 7 Juni 2026",
+                teams: "Tim 1 & 2",
+                schedule: [
+                    { no: 1, time: "12:00", endTime: "12:00", duration: "00:00", activity: "Peserta tiba di Venue", venue: "Ranch Market - Foodcourt", detail: "" },
+                    { no: 2, time: "12:00", endTime: "12:40", duration: "00:40", activity: "PREPARATION (packing barang, ganti, dandan, makan)", venue: "Ranch Market - Foodcourt", detail: "Peserta diminta packing barang, dan memasukkan kedalam plastik besar" },
+                    { no: 3, time: "12:40", endTime: "13:00", duration: "00:20", activity: "FOTO TEAM, FLASHMOB, Seru seruan di BOOTH DF", venue: "Booth DF", detail: "FOTO team didepan booth, pembuatan konten reel - Flash mob" },
+                    { no: 4, time: "13:00", endTime: "15:00", duration: "02:00", activity: "PERFORM", venue: "Istora Senayan", detail: "perform didalam istora dengan waktu bersih 2 jam." },
+                    { no: 5, time: "15:00", endTime: "15:20", duration: "00:20", activity: "MERAMAIKAN EVENT PIO 2026", venue: "Booth DF / Booth Polytron / Stage Entertainment", detail: "Team keluar dari Istora, dan meramaikan event Indo Open" },
+                    { no: 6, time: "15:20", endTime: "16:00", duration: "00:40", activity: "Rehat, Ganti, Makan, dan MENINGGALKAN ISTORA SENAYAN", venue: "Ranch Market - Foodcourt", detail: "Peserta sudah bisa mengambil barang, melepas kostum & makeup" },
+                ]
+            },
+            {
+                date: "minggu",
+                dateDisplay: "Minggu, 7 Juni 2026",
+                teams: "Tim 5 & 6",
+                schedule: [
+                    { no: 1, time: "15:00", endTime: "15:00", duration: "00:00", activity: "Peserta tiba di Venue", venue: "Ranch Market - Foodcourt", detail: "" },
+                    { no: 2, time: "15:00", endTime: "15:40", duration: "00:40", activity: "PREPARATION (packing barang, ganti, dandan, makan)", venue: "Ranch Market - Foodcourt", detail: "Peserta diminta packing barang, dan memasukkan kedalam plastik besar" },
+                    { no: 3, time: "15:40", endTime: "16:00", duration: "00:20", activity: "FOTO TEAM, FLASHMOB, Seru seruan di BOOTH DF", venue: "Booth DF", detail: "FOTO team didepan booth, pembuatan konten reel - Flash mob" },
+                    { no: 4, time: "16:00", endTime: "18:00", duration: "02:00", activity: "PERFORM", venue: "Istora Senayan", detail: "perform didalam istora dengan waktu bersih 2 jam." },
+                    { no: 5, time: "18:00", endTime: "18:20", duration: "00:20", activity: "MERAMAIKAN EVENT PIO 2026", venue: "Booth DF / Booth Polytron / Stage Entertainment", detail: "Team keluar dari Istora, dan meramaikan event Indo Open" },
+                    { no: 6, time: "18:20", endTime: "19:00", duration: "00:40", activity: "Rehat, Ganti, Makan, dan MENINGGALKAN ISTORA SENAYAN", venue: "Ranch Market - Foodcourt", detail: "Peserta sudah bisa mengambil barang, melepas kostum & makeup" },
+                ]
+            },
+        ];
+
+        let currentFilter = 'all';
+        let currentSearch = '';
+
+        // Initialize
+        function init() {
+            renderCards();
+            renderTable();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Search
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                currentSearch = e.target.value.toLowerCase();
+                filterAndRender();
+            });
+
+            // Filter buttons
+            document.querySelectorAll('[data-date]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('[data-date]').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentFilter = e.target.dataset.date;
+                    filterAndRender();
+                });
+            });
+
+            // View toggle
+            document.getElementById('cardViewBtn').addEventListener('click', () => {
+                document.getElementById('cardView').style.display = 'grid';
+                document.getElementById('tableView').style.display = 'none';
+                document.getElementById('cardViewBtn').classList.add('active');
+                document.getElementById('tableViewBtn').classList.remove('active');
+            });
+
+            document.getElementById('tableViewBtn').addEventListener('click', () => {
+                document.getElementById('cardView').style.display = 'none';
+                document.getElementById('tableView').style.display = 'block';
+                document.getElementById('cardViewBtn').classList.remove('active');
+                document.getElementById('tableViewBtn').classList.add('active');
+            });
+        }
+
+        function getFilteredData() {
+            let filtered = eventData;
+
+            // Apply date filter
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(item => item.date === currentFilter);
+            }
+
+            // Apply search filter
+            if (currentSearch) {
+                filtered = filtered.map(item => ({
+                    ...item,
+                    schedule: item.schedule.filter(s => {
+                        const searchStr = `${s.activity} ${s.venue} ${s.detail}`.toLowerCase();
+                        return searchStr.includes(currentSearch);
+                    })
+                })).filter(item => item.schedule.length > 0);
+            }
+
+            return filtered;
+        }
+
+        function renderCards() {
+            const container = document.getElementById('cardView');
+            const data = getFilteredData();
+
+            if (data.length === 0) {
+                document.getElementById('noResults').style.display = 'block';
+                container.innerHTML = '';
+                return;
+            }
+
+            document.getElementById('noResults').style.display = 'none';
+
+            container.innerHTML = data.map((event, idx) => {
+                const schedule = event.schedule.map((item, i) => `
+                    <div class="timeline-item">
+                        <div class="timeline-time">
+                            ${item.time} - ${item.endTime}
+                            <span class="timeline-duration">${item.duration}</span>
+                        </div>
+                        <div class="timeline-description">${item.activity}</div>
+                        <div class="timeline-venue">
+                            <span class="venue-icon">📍</span>
+                            ${item.venue}
+                        </div>
+                        ${item.detail ? `<div class="timeline-detail">📝 ${item.detail}</div>` : ''}
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="schedule-card" style="animation-delay: ${idx * 0.1}s">
+                        <div class="card-header">
+                            <div class="card-date">${event.dateDisplay}</div>
+                            <div class="card-teams">👥 ${event.teams}</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                ${schedule}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const data = getFilteredData();
+
+            let counter = 1;
+            const rows = data.flatMap(event => 
+                event.schedule.map(item => ({
+                    ...item,
+                    dateDisplay: event.dateDisplay,
+                    teams: event.teams,
+                    counter: counter++
+                }))
+            );
+
+            tbody.innerHTML = rows.map(item => `
+                <tr>
+                    <td>${item.counter}</td>
+                    <td><strong>${item.dateDisplay}</strong><br><span class="team-badge">${item.teams}</span></td>
+                    <td class="time-cell">${item.time} - ${item.endTime}</td>
+                    <td><span class="duration-badge">${item.duration}</span></td>
+                    <td><strong>${item.activity}</strong>${item.detail ? `<br><small style="color: var(--text-light);">📝 ${item.detail}</small>` : ''}</td>
+                    <td>${item.venue}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterAndRender() {
+            renderCards();
+            renderTable();
+        }
+
+        init();
+    </script>
+</body>
+</html>
