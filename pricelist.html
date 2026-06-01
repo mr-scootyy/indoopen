@@ -6,21 +6,26 @@
 	<title>Pricelist</title>
 	<style>
 		:root{
-			--bg:#0b1220;
-			--card:#111a2e;
-			--muted:#93a4c7;
-			--text:#e9eefc;
-			--line:rgba(255,255,255,.10);
-			--accent:#6ea8ff;
-			--chip:#182544;
+			--bg:#2a0a0a;
+			--card:rgba(255,255,255,.06);
+			--muted:rgba(255,255,255,.75);
+			--text:#ffffff;
+			--line:rgba(255,255,255,.14);
+			--accent:#ffd1d1;
+			--chip:rgba(255,255,255,.07);
 		}
 		*{box-sizing:border-box}
 		body{
-			margin:0;
-			font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-			background:linear-gradient(180deg,#070b14, #0b1220 40%, #070b14);
-			color:var(--text);
-		}
+	margin:0;
+	font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+	background: linear-gradient(180deg,
+		#7a0b0b 0%,
+		#b31217 35%,
+		#7a0b0b 70%,
+		#3a0606 100%
+	);
+	color:var(--text);
+}
 		.container{
 			max-width:980px;
 			margin:0 auto;
@@ -34,6 +39,21 @@
 			flex-wrap:wrap;
 			margin-bottom:12px;
 		}
+		.brand{
+	width:100%;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+	padding:6px 0 2px;
+}
+
+.logo{
+	max-width:min(520px, 85vw);
+	width:100%;
+	height:auto;
+	display:block;
+	object-fit:contain;
+}
 		.title{
 			margin:0;
 			font-size:20px;
@@ -161,8 +181,13 @@
 <body>
 	<div class="container">
 		<div class="header">
-			<div>
-				<h1 class="title">Pricelist Produk Djarum</h1>
+	<div class="brand">
+		<img class="logo" src="Dj_white.png" alt="Djarum Foundation" />
+	</div>
+
+	<div>
+				
+				<h1 class="title">Pricelist Produk Djarum Indonesia Open 2026</h1>
 				<div class="badge"><span class="dot"></span><span id="countInfo">Memuat data…</span></div>
 			</div>
 		</div>
@@ -189,7 +214,7 @@
 
 		<div class="footer">
 			<div><b>Catatan:</b> Item dengan harga <b>TBA</b> = harga belum tersedia.</div>
-			<div>Jika kamu mau versi tema terang / ditambah kategori / tombol WhatsApp order, tinggal bilang.</div>
+			<div>WhatsApp order = </div>
 		</div>
 	</div>
 
