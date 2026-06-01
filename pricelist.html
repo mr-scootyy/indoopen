@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="id">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Pricelist</title>
+	<style>
+		:root{
+			--bg:#0b1220;
+			--card:#111a2e;
+			--muted:#93a4c7;
+			--text:#e9eefc;
+			--line:rgba(255,255,255,.10);
+			--accent:#6ea8ff;
+			--chip:#182544;
+		}
+		*{box-sizing:border-box}
+		body{
+			margin:0;
+			font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+			background:linear-gradient(180deg,#070b14, #0b1220 40%, #070b14);
+			color:var(--text);
+		}
+		.container{
+			max-width:980px;
+			margin:0 auto;
+			padding:18px 14px 28px;
+		}
+		.header{
+			display:flex;
+			gap:12px;
+			align-items:flex-start;
+			justify-content:space-between;
+			flex-wrap:wrap;
+			margin-bottom:12px;
+		}
+		.title{
+			margin:0;
+			font-size:20px;
+			letter-spacing:.2px;
+		}
+		.sub{
+			margin:6px 0 0;
+			color:var(--muted);
+			font-size:12.5px;
+			line-height:1.4;
+		}
+
+		.toolbar{
+			display:grid;
+			grid-template-columns: 1fr 160px;
+			gap:10px;
+			width:100%;
+			margin:12px 0 14px;
+		}
+		@media (max-width:520px){
+			.toolbar{grid-template-columns:1fr}
+		}
+		.input, .select{
+			width:100%;
+			padding:12px 12px;
+			border-radius:12px;
+			border:1px solid var(--line);
+			background:rgba(17,26,46,.7);
+			color:var(--text);
+			outline:none;
+		}
+		.input::placeholder{color:rgba(147,164,199,.75)}
+		.badge{
+			display:inline-flex;
+			align-items:center;
+			gap:8px;
+			padding:8px 10px;
+			border-radius:999px;
+			background:rgba(24,37,68,.65);
+			border:1px solid var(--line);
+			color:var(--muted);
+			font-size:12px;
+			margin-top:10px;
+			width:max-content;
+		}
+		.dot{
+			width:8px;height:8px;border-radius:50%;
+			background:var(--accent);
+			box-shadow:0 0 0 4px rgba(110,168,255,.18);
+		}
+
+		.grid{
+			display:grid;
+			grid-template-columns: repeat(2, minmax(0,1fr));
+			gap:10px;
+		}
+		@media (max-width:640px){
+			.grid{grid-template-columns:1fr}
+		}
+
+		.card{
+			background:rgba(17,26,46,.72);
+			border:1px solid var(--line);
+			border-radius:16px;
+			padding:12px 12px;
+			backdrop-filter: blur(6px);
+		}
+		.cardTop{
+			display:flex;
+			align-items:flex-start;
+			justify-content:space-between;
+			gap:10px;
+			margin-bottom:8px;
+		}
+		.name{
+			margin:0;
+			font-size:14.5px;
+			line-height:1.25;
+		}
+		.no{
+			color:var(--muted);
+			font-size:12px;
+			white-space:nowrap;
+		}
+		.meta{
+			display:flex;
+			gap:8px;
+			flex-wrap:wrap;
+			margin:8px 0 0;
+		}
+		.chip{
+			font-size:12px;
+			color:var(--muted);
+			background:rgba(24,37,68,.65);
+			border:1px solid var(--line);
+			padding:5px 8px;
+			border-radius:999px;
+		}
+		.price{
+			margin:10px 0 0;
+			font-weight:700;
+			font-size:15px;
+			color:#ffffff;
+		}
+		.price small{
+			display:inline-block;
+			margin-left:8px;
+			font-weight:600;
+			color:var(--muted);
+			font-size:12px;
+		}
+		hr{
+			border:none;
+			border-top:1px solid var(--line);
+			margin:12px 0;
+		}
+		.footer{
+			margin-top:14px;
+			color:var(--muted);
+			font-size:12px;
+			line-height:1.5;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<div>
+				<h1 class="title">Pricelist Produk Djarum</h1>
+				<div class="badge"><span class="dot"></span><span id="countInfo">Memuat data…</span></div>
+			</div>
+		</div>
+
+		<div class="toolbar">
+			<input id="q" class="input" type="search" placeholder="Cari produk… (contoh: jersey, hoodie, topi, tote bag)" />
+			<select id="size" class="select">
+				<option value="">Semua ukuran</option>
+				<option>S</option>
+				<option>M</option>
+				<option>L</option>
+				<option>XL</option>
+				<option>2XL</option>
+				<option>3XL</option>
+				<option>All Size</option>
+				<option>-</option>
+				<option value="__EMPTY__">(kosong)</option>
+			</select>
+		</div>
+
+		<div id="grid" class="grid"></div>
+
+		<hr>
+
+		<div class="footer">
+			<div><b>Catatan:</b> Item dengan harga <b>TBA</b> = harga belum tersedia.</div>
+			<div>Jika kamu mau versi tema terang / ditambah kategori / tombol WhatsApp order, tinggal bilang.</div>
+		</div>
+	</div>
+
+	<script>
+		// ====== Data dari CSV kamu (dibuat array JS) ======
+		// Kolom: no, produk, ukuran, harga
+		const items = [
+			{no:1, produk:"Sticker Packs", ukuran:"-", harga:"Rp 15.000,-"},
+			{no:2, produk:"Racket Bag - Acrylic Keychain", ukuran:"-", harga:"Rp 15.000,-"},
+			{no:3, produk:"Kok Merah - Acrylic Keychain", ukuran:"-", harga:"Rp 15.000,-"},
+			{no:4, produk:"Kok Hitam - Acrylic Keychain", ukuran:"-", harga:"Rp 15.000,-"},
+			{no:5, produk:"Raket Merah Putih - Acrylic Keychain", ukuran:"-", harga:"Rp15.000,00"},
+			{no:6, produk:"Raket Hitam Biru - Acrylic Keychain", ukuran:"-", harga:"Rp15.000,00"},
+			{no:7, produk:"Racket Duffle Bag", ukuran:"-", harga:"Rp400.000,00"},
+			{no:8, produk:"Track Jacket Gray Red", ukuran:"S", harga:"Rp300.000,00"},
+			{no:9, produk:"Track Jacket Gray Red", ukuran:"M", harga:"Rp300.000,00"},
+			{no:10, produk:"Track Jacket Gray Red", ukuran:"L", harga:"Rp300.000,00"},
+			{no:11, produk:"Track Jacket Gray Red", ukuran:"XL", harga:"Rp300.000,00"},
+			{no:12, produk:"Track Jacket Gray Red", ukuran:"2XL", harga:"Rp300.000,00"},
+			{no:13, produk:"Oversized Hoodie Gray", ukuran:"S", harga:"Rp250.000,00"},
+			{no:14, produk:"Oversized Hoodie Gray", ukuran:"M", harga:"Rp250.000,00"},
+			{no:15, produk:"Oversized Hoodie Gray", ukuran:"L", harga:"Rp250.000,00"},
+			{no:16, produk:"Oversized Hoodie Gray", ukuran:"XL", harga:"Rp250.000,00"},
+			{no:17, produk:"Oversized Hoodie Gray", ukuran:"2XL", harga:"Rp250.000,00"},
+			{no:18, produk:"Jersey Sublim Black Serve Cold", ukuran:"S", harga:"Rp150.000,00"},
+			{no:19, produk:"Jersey Sublim Black Serve Cold", ukuran:"M", harga:"Rp150.000,00"},
+			{no:20, produk:"Jersey Sublim Black Serve Cold", ukuran:"L", harga:"Rp150.000,00"},
+			{no:21, produk:"Jersey Sublim Black Serve Cold", ukuran:"XL", harga:"Rp150.000,00"},
+			{no:22, produk:"Jersey Sublim Black Serve Cold", ukuran:"2XL", harga:"Rp150.000,00"},
+			{no:23, produk:"Jersey Sublim Red", ukuran:"S", harga:"Rp150.000,00"},
+			{no:24, produk:"Jersey Sublim Red", ukuran:"M", harga:"Rp150.000,00"},
+			{no:25, produk:"Jersey Sublim Red", ukuran:"L", harga:"Rp150.000,00"},
+			{no:26, produk:"Jersey Sublim Red", ukuran:"XL", harga:"Rp150.000,00"},
+			{no:27, produk:"Jersey Sublim Red", ukuran:"2XL", harga:"Rp150.000,00"},
+			{no:28, produk:"Jersey Sublim White Gray Red", ukuran:"S", harga:"Rp150.000,00"},
+			{no:29, produk:"Jersey Sublim White Gray Red", ukuran:"M", harga:"Rp150.000,00"},
+			{no:30, produk:"Jersey Sublim White Gray Red", ukuran:"L", harga:"Rp150.000,00"},
+			{no:31, produk:"Jersey Sublim White Gray Red", ukuran:"XL", harga:"Rp150.000,00"},
+			{no:32, produk:"Jersey Sublim White Gray Red", ukuran:"2XL", harga:"Rp150.000,00"},
+			{no:33, produk:"Kaos Oblong Club De Badminton Navy", ukuran:"S", harga:"Rp100.000,00"},
+			{no:34, produk:"Kaos Oblong Club De Badminton Navy", ukuran:"M", harga:"Rp100.000,00"},
+			{no:35, produk:"Kaos Oblong Club De Badminton Navy", ukuran:"L", harga:"Rp100.000,00"},
+			{no:36, produk:"Kaos Oblong Club De Badminton Navy", ukuran:"XL", harga:"Rp100.000,00"},
+			{no:37, produk:"Kaos Oblong Club De Badminton Navy", ukuran:"2XL", harga:"Rp100.000,00"},
+			{no:38, produk:"Kaos Oblong Shuttle Slayer Baby Blue", ukuran:"S", harga:"Rp100.000,00"},
+			{no:39, produk:"Kaos Oblong Shuttle Slayer Baby Blue", ukuran:"M", harga:"Rp100.000,00"},
+			{no:40, produk:"Kaos Oblong Shuttle Slayer Baby Blue", ukuran:"L", harga:"Rp100.000,00"},
+			{no:41, produk:"Kaos Oblong Shuttle Slayer Baby Blue", ukuran:"XL", harga:"Rp100.000,00"},
+			{no:42, produk:"Kaos Oblong Shuttle Slayer Baby Blue", ukuran:"2XL", harga:"Rp100.000,00"},
+			{no:43, produk:"Oversized Poloshirt Jersey Navy", ukuran:"S", harga:"Rp150.000,00"},
+			{no:44, produk:"Oversized Poloshirt Jersey Navy", ukuran:"M", harga:"Rp150.000,00"},
+			{no:45, produk:"Oversized Poloshirt Jersey Navy", ukuran:"L", harga:"Rp150.000,00"},
+			{no:46, produk:"Oversized Poloshirt Jersey Navy", ukuran:"XL", harga:"Rp150.000,00"},
+			{no:47, produk:"Oversized Poloshirt Jersey Navy", ukuran:"2XL", harga:"Rp150.000,00"},
+			{no:48, produk:"Polo Shirt Sublim Red Jersey", ukuran:"S", harga:"Rp150.000,00"},
+			{no:49, produk:"Polo Shirt Sublim Red Jersey", ukuran:"M", harga:"Rp150.000,00"},
+			{no:50, produk:"Polo Shirt Sublim Red Jersey", ukuran:"L", harga:"Rp150.000,00"},
+			{no:51, produk:"Polo Shirt Sublim Red Jersey", ukuran:"XL", harga:"Rp150.000,00"},
+			{no:52, produk:"Polo Shirt Sublim Red Jersey", ukuran:"2XL", harga:"Rp150.000,00"},
+			{no:53, produk:"Kaos Oblong Rainbow Smash Navy", ukuran:"S", harga:"Rp100.000,00"},
+			{no:54, produk:"Kaos Oblong Rainbow Smash Navy", ukuran:"M", harga:"Rp100.000,00"},
+			{no:55, produk:"Kaos Oblong Rainbow Smash Navy", ukuran:"L", harga:"Rp100.000,00"},
+			{no:56, produk:"Kaos Oblong Rainbow Smash Navy", ukuran:"XL", harga:"Rp100.000,00"},
+			{no:57, produk:"Kaos Oblong Rainbow Smash Navy", ukuran:"2XL", harga:"Rp100.000,00"},
+			{no:58, produk:"Kaos Oblong Rainbow Smash Navy", ukuran:"3XL", harga:"Rp100.000,00"},
+			{no:59, produk:"Kaos Oblong Batik Hitam", ukuran:"S", harga:"Rp100.000,00"},
+			{no:60, produk:"Kaos Oblong Batik Hitam", ukuran:"M", harga:"Rp100.000,00"},
+			{no:61, produk:"Kaos Oblong Batik Hitam", ukuran:"L", harga:"Rp100.000,00"},
+			{no:62, produk:"Kaos Oblong Batik Hitam", ukuran:"XL", harga:"Rp100.000,00"},
+			{no:63, produk:"Kaos Oblong Batik Hitam", ukuran:"2XL", harga:"Rp100.000,00"},
+			{no:64, produk:"Kaos Oblong Batik Hitam", ukuran:"3XL", harga:"Rp100.000,00"},
+			{no:65, produk:"Kaos Oblong Brave Navy", ukuran:"M", harga:"Rp100.000,00"},
+			{no:66, produk:"Kaos Oblong Brave Navy", ukuran:"L", harga:"Rp100.000,00"},
+			{no:67, produk:"Kaos Oblong Brave Navy", ukuran:"XL", harga:"Rp100.000,00"},
+			{no:68, produk:"Kaos Oblong Brave Navy", ukuran:"3XL", harga:"Rp100.000,00"},
+			{no:69, produk:"Kaos Oblong Detail Hitam", ukuran:"S", harga:"Rp100.000,00"},
+			{no:70, produk:"Kaos Oblong Detail Hitam", ukuran:"M", harga:"Rp100.000,00"},
+			{no:71, produk:"Kaos Oblong Detail Hitam", ukuran:"L", harga:"Rp100.000,00"},
+			{no:72, produk:"Kaos Oblong Detail Hitam", ukuran:"XL", harga:"Rp100.000,00"},
+			{no:73, produk:"Kaos Oblong Detail Hitam", ukuran:"2XL", harga:"Rp100.000,00"},
+			{no:74, produk:"Kaos Oblong Detail Hitam", ukuran:"3XL", harga:"Rp100.000,00"},
+			{no:75, produk:"Gantungan Kunci Kayu Djarum Badmintion Club Kain", ukuran:"", harga:"Rp15.000,00"},
+			{no:76, produk:"Jasa Sablon Nama / Negara", ukuran:"", harga:"Rp25,000.00 / baris"},
+			{no:77, produk:"Jersey Indonesia PB Djarum-2026 Red-02", ukuran:"S", harga:"TBA"},
+			{no:78, produk:"Jersey Indonesia PB Djarum-2026 Red-03", ukuran:"M", harga:"TBA"},
+			{no:79, produk:"Jersey Indonesia PB Djarum-2026 Red-04", ukuran:"L", harga:"TBA"},
+			{no:80, produk:"Jersey Indonesia PB Djarum-2026 Red-05", ukuran:"XL", harga:"TBA"},
+			{no:81, produk:"Jersey Indonesia PB Djarum-2026 Red-06", ukuran:"2XL", harga:"TBA"},
+			{no:82, produk:"Jersey Indonesia PB Djarum-2026 White-03", ukuran:"S", harga:"TBA"},
+			{no:83, produk:"Jersey Indonesia PB Djarum-2026 White-04", ukuran:"M", harga:"TBA"},
+			{no:84, produk:"Jersey Indonesia PB Djarum-2026 White-05", ukuran:"L", harga:"TBA"},
+			{no:85, produk:"Jersey Indonesia PB Djarum-2026 White-06", ukuran:"XL", harga:"TBA"},
+			{no:86, produk:"Jersey Indonesia PB Djarum-2026 White-07", ukuran:"2XL", harga:"TBA"},
+			{no:87, produk:"Jersey Indonesia PB Djarum-2026 Black-04", ukuran:"S", harga:"TBA"},
+			{no:88, produk:"Jersey Indonesia PB Djarum-2026 Black-05", ukuran:"M", harga:"TBA"},
+			{no:89, produk:"Jersey Indonesia PB Djarum-2026 Black-06", ukuran:"L", harga:"TBA"},
+			{no:90, produk:"Jersey Indonesia PB Djarum-2026 Black-07", ukuran:"XL", harga:"TBA"},
+			{no:91, produk:"Jersey Indonesia PB Djarum-2026 Black-08", ukuran:"2XL", harga:"TBA"},
+			{no:92, produk:"Track Jacket Indonesia PB Djarum-2026 red", ukuran:"S", harga:"TBA"},
+			{no:93, produk:"Track Jacket Indonesia PB Djarum-2026 red", ukuran:"M", harga:"TBA"},
+			{no:94, produk:"Track Jacket Indonesia PB Djarum-2026 red", ukuran:"L", harga:"TBA"},
+			{no:95, produk:"Track Jacket Indonesia PB Djarum-2026 red", ukuran:"XL", harga:"TBA"},
+			{no:96, produk:"Track Jacket Indonesia PB Djarum-2026 red", ukuran:"2XL", harga:"TBA"},
+			{no:97, produk:"Topi PB Djarum 2026 Black -01", ukuran:"All Size", harga:"TBA"},
+			{no:98, produk:"Topi PB Djarum 2026 Black -01", ukuran:"All Size", harga:"TBA"},
+			{no:99, produk:"Topi PB Djarum 2026 Black -01", ukuran:"All Size", harga:"TBA"},
+			{no:100, produk:"Topi PB Djarum 2026 Black -01", ukuran:"All Size", harga:"TBA"},
+			{no:101, produk:"Topi PB Djarum 2026 Black -01", ukuran:"All Size", harga:"TBA"},
+			{no:102, produk:"Topi PB Djarum 2026 Navy -02", ukuran:"All Size", harga:"TBA"},
+			{no:103, produk:"Topi PB Djarum 2026 Navy -02", ukuran:"All Size", harga:"TBA"},
+			{no:104, produk:"Topi PB Djarum 2026 Navy -02", ukuran:"All Size", harga:"TBA"},
+			{no:105, produk:"Topi PB Djarum 2026 Navy -02", ukuran:"All Size", harga:"TBA"},
+			{no:106, produk:"Topi PB Djarum 2026 Navy -02", ukuran:"All Size", harga:"TBA"},
+			{no:107, produk:"Tote Bag Indonesia PB Djarum-2026-red-02", ukuran:"-", harga:"TBA"},
+			{no:108, produk:"Boxy Shirt White PIO 2026", ukuran:"S", harga:"TBA"},
+			{no:109, produk:"Boxy Shirt White PIO 2027", ukuran:"M", harga:"TBA"},
+			{no:110, produk:"Boxy Shirt White PIO 2028", ukuran:"L", harga:"TBA"},
+			{no:111, produk:"Boxy Shirt White PIO 2029", ukuran:"XL", harga:"TBA"},
+			{no:112, produk:"Boxy Shirt White PIO 2030", ukuran:"2XL", harga:"TBA"},
+			{no:113, produk:"Boxy Shirt Red PIO 2026", ukuran:"S", harga:"TBA"},
+			{no:114, produk:"Boxy Shirt Red PIO 2027", ukuran:"M", harga:"TBA"},
+			{no:115, produk:"Boxy Shirt Red PIO 2028", ukuran:"L", harga:"TBA"},
+			{no:116, produk:"Boxy Shirt Red PIO 2029", ukuran:"XL", harga:"TBA"},
+			{no:117, produk:"Boxy Shirt Red PIO 2030", ukuran:"2XL", harga:"TBA"},
+			{no:118, produk:"Sticker Packs 2", ukuran:"-", harga:"Rp 15.000,-"},
+			{no:119, produk:"Courage Cream", ukuran:"S", harga:"Rp100.000,00"},
+			{no:120, produk:"Courage Cream", ukuran:"M", harga:"Rp100.000,00"},
+			{no:121, produk:"Courage Cream", ukuran:"L", harga:"Rp100.000,00"},
+			{no:122, produk:"Courage Cream", ukuran:"XL", harga:"Rp100.000,00"},
+			{no:123, produk:"Courage Cream", ukuran:"2XL", harga:"Rp100.000,00"},
+			{no:124, produk:"Courage Sage Green", ukuran:"S", harga:"Rp100.000,00"},
+			{no:125, produk:"Courage Sage Green", ukuran:"M", harga:"Rp100.000,00"},
+			{no:126, produk:"Courage Sage Green", ukuran:"L", harga:"Rp100.000,00"},
+			{no:127, produk:"Courage Sage Green", ukuran:"XL", harga:"Rp100.000,00"},
+			{no:128, produk:"Courage Sage Green", ukuran:"2XL", harga:"Rp100.000,00"},
+			{no:129, produk:"Celana Pendek Dewasa - Hitam", ukuran:"S", harga:"Rp100.000,00"},
+			{no:130, produk:"Celana Pendek Dewasa - Hitam", ukuran:"M", harga:"Rp100.000,00"},
+			{no:131, produk:"Celana Pendek Dewasa - Hitam", ukuran:"L", harga:"Rp100.000,00"},
+			{no:132, produk:"Celana Pendek Dewasa - Hitam", ukuran:"XL", harga:"Rp100.000,00"},
+			{no:133, produk:"Celana Pendek Dewasa - Hitam", ukuran:"2XL", harga:"Rp100.000,00"},
+			{no:134, produk:"Celana Pendek Dewasa - Merah", ukuran:"S", harga:"Rp100.000,00"},
+			{no:135, produk:"Celana Pendek Dewasa - Merah", ukuran:"M", harga:"Rp100.000,00"},
+			{no:136, produk:"Celana Pendek Dewasa - Merah", ukuran:"L", harga:"Rp100.000,00"},
+			{no:137, produk:"Celana Pendek Dewasa - Merah", ukuran:"XL", harga:"Rp100.000,00"},
+			{no:138, produk:"Celana Pendek Dewasa - Merah", ukuran:"2XL", harga:"Rp100.000,00"},
+			{no:139, produk:"Jersey PB DJARUM - Red Curve", ukuran:"S", harga:"Rp200.000,00"},
+			{no:140, produk:"Jersey PB DJARUM - Red Curve", ukuran:"M", harga:"Rp200.000,00"},
+			{no:141, produk:"Jersey PB DJARUM - Red Curve", ukuran:"L", harga:"Rp200.000,00"},
+			{no:142, produk:"Jersey PB DJARUM - Red Curve", ukuran:"XL", harga:"Rp200.000,00"},
+			{no:143, produk:"Jersey PB DJARUM - Red Curve", ukuran:"2XL", harga:"Rp200.000,00"},
+			{no:144, produk:"Jersey PB DJARUM - BLack Silver", ukuran:"S", harga:"Rp200.000,00"},
+			{no:145, produk:"Jersey PB DJARUM - BLack Silver", ukuran:"M", harga:"Rp200.000,00"},
+			{no:146, produk:"Jersey PB DJARUM - BLack Silver", ukuran:"L", harga:"Rp200.000,00"},
+			{no:147, produk:"Jersey PB DJARUM - BLack Silver", ukuran:"XL", harga:"Rp200.000,00"},
+			{no:148, produk:"Jersey PB DJARUM - BLack Silver", ukuran:"2XL", harga:"Rp200.000,00"},
+			{no:149, produk:"Jersey PB DJARUM - Putih Abu", ukuran:"S", harga:"Rp200.000,00"},
+			{no:150, produk:"Jersey PB DJARUM - Putih Abu", ukuran:"M", harga:"Rp200.000,00"},
+			{no:151, produk:"Jersey PB DJARUM - Putih Abu", ukuran:"L", harga:"Rp200.000,00"},
+			{no:152, produk:"Jersey PB DJARUM - Putih Abu", ukuran:"XL", harga:"Rp200.000,00"},
+			{no:153, produk:"Jersey PB DJARUM - Putih Abu", ukuran:"2XL", harga:"Rp200.000,00"},
+			{no:154, produk:"Kaos Oblong Oversize Lilac", ukuran:"M", harga:"Rp125.000,00"},
+			{no:155, produk:"Kaos Oblong Oversize Lilac", ukuran:"XL", harga:"Rp125.000,00"},
+			{no:156, produk:"Kaos Oblong Polar Game On Hitam", ukuran:"S", harga:"Rp125.000,00"},
+			{no:157, produk:"Kaos Oblong Polar Game On Hitam", ukuran:"M", harga:"Rp125.000,00"},
+			{no:158, produk:"Kaos Oblong Polar Game On Hitam", ukuran:"L", harga:"Rp125.000,00"},
+			{no:159, produk:"Kaos Oblong Polar Game On Hitam", ukuran:"XL", harga:"Rp125.000,00"},
+			{no:160, produk:"Kaos Oblong Polar Game On Hitam", ukuran:"2XL", harga:"Rp125.000,00"},
+			{no:161, produk:"Kaos Oblong Polar Game Putih", ukuran:"S", harga:"Rp125.000,00"},
+			{no:162, produk:"Kaos Oblong Polar Game Putih", ukuran:"M", harga:"Rp125.000,00"},
+			{no:163, produk:"Kaos Oblong Polar Game Putih", ukuran:"2XL", harga:"Rp125.000,00"},
+			{no:164, produk:"Kaos Oblong Polar Rally - Light Blue", ukuran:"L", harga:"Rp125.000,00"},
+			{no:165, produk:"Kaos Oblong Polar Rally - Light Blue", ukuran:"XL", harga:"Rp125.000,00"},
+			{no:166, produk:"Kaos Oblong Polar Winning Tactics - Beige", ukuran:"S", harga:"Rp125.000,00"},
+			{no:167, produk:"Kaos Oblong Polar Winning Tactics - Beige", ukuran:"M", harga:"Rp125.000,00"},
+			{no:168, produk:"Kaos Oblong Polar Winning Tactics - Beige", ukuran:"L", harga:"Rp125.000,00"},
+			{no:169, produk:"Kaos Oblong Polar Winning Tactics - Beige", ukuran:"XL", harga:"Rp125.000,00"},
+			{no:170, produk:"Kaos Oblong Polar Winning Tactics - Beige", ukuran:"2XL", harga:"Rp125.000,00"},
+			{no:171, produk:"Kaos Oblong Polar Winning Tactics - Sage Green", ukuran:"S", harga:"Rp125.000,00"},
+			{no:172, produk:"Kaos Oblong Polar Winning Tactics - Sage Green", ukuran:"M", harga:"Rp125.000,00"},
+			{no:173, produk:"Kaos Oblong Polar Winning Tactics - Sage Green", ukuran:"L", harga:"Rp125.000,00"},
+			{no:174, produk:"Kaos Oblong Polar Winning Tactics - Sage Green", ukuran:"XL", harga:"Rp125.000,00"},
+			{no:175, produk:"Kaos Oblong Polar Winning Tactics - Sage Green", ukuran:"2XL", harga:"Rp125.000,00"},
+			{no:176, produk:"Kaos Oblong Polar Play - Brown", ukuran:"S", harga:"Rp125.000,00"},
+			{no:177, produk:"Kaos Oblong Polar Play - Brown", ukuran:"M", harga:"Rp125.000,00"},
+			{no:178, produk:"Kaos Oblong Polar Play - Brown", ukuran:"L", harga:"Rp125.000,00"},
+			{no:179, produk:"Kaos Oblong Polar Play - Brown", ukuran:"XL", harga:"Rp125.000,00"},
+			{no:180, produk:"Kaos Oblong Polar Play - Dusty Pink", ukuran:"L", harga:"Rp125.000,00"},
+			{no:181, produk:"Kaos Oblong Polar Play - Dusty Pink", ukuran:"XL", harga:"Rp125.000,00"},
+			{no:182, produk:"Kaos Oblong DBC Biru Muda", ukuran:"M", harga:"Rp125.000,00"},
+			{no:183, produk:"Kaos Oblong DBC Biru Muda", ukuran:"L", harga:"Rp125.000,00"},
+			{no:184, produk:"Kaos Oblong DBC Biru Muda", ukuran:"XL", harga:"Rp125.000,00"},
+			{no:185, produk:"Kaos Oblong DBC Biru Tua", ukuran:"L", harga:"Rp125.000,00"},
+			{no:186, produk:"Kaos Oblong DBC Biru Tua", ukuran:"XL", harga:"Rp125.000,00"},
+			{no:187, produk:"Kaos Oblong DBC Merah", ukuran:"L", harga:"Rp125.000,00"},
+			{no:188, produk:"Kaos Oblong DBC Merah", ukuran:"2XL", harga:"Rp125.000,00"},
+			{no:189, produk:"Kaos Oblong DBC Hijau", ukuran:"XL", harga:"Rp125.000,00"},
+			{no:190, produk:"Kaos Oblong DBC ABU", ukuran:"M", harga:"Rp125.000,00"},
+		];
+
+		// ====== Rendering + Filter ======
+		const grid = document.getElementById("grid");
+		const qEl = document.getElementById("q");
+		const sizeEl = document.getElementById("size");
+		const countInfo = document.getElementById("countInfo");
+
+		function norm(s){ return (s ?? "").toString().trim().toLowerCase(); }
+
+		function getSizeValue(){
+			const v = sizeEl.value;
+			if(v === "__EMPTY__") return "";
+			return v;
+		}
+
+		function render(){
+			const q = norm(qEl.value);
+			const size = getSizeValue();
+
+			const filtered = items.filter(it => {
+				const matchQ =
+					!q ||
+					norm(it.produk).includes(q) ||
+					norm(it.harga).includes(q) ||
+					norm(it.ukuran).includes(q);
+
+				const matchSize = !size || (it.ukuran ?? "") === size;
+				return matchQ && matchSize;
+			});
+
+			countInfo.textContent = `Menampilkan ${filtered.length} dari ${items.length} item`;
+
+			grid.innerHTML = filtered.map(it => {
+				const ukuran = (it.ukuran ?? "").trim();
+				const harga = (it.harga ?? "").trim();
+				const isTBA = norm(harga) === "tba";
+
+				return `
+					<div class="card">
+						<div class="cardTop">
+							<h3 class="name">${escapeHtml(it.produk)}</h3>
+							<div class="no">#${it.no}</div>
+						</div>
+						<div class="meta">
+							<span class="chip">Ukuran: ${escapeHtml(ukuran || "-")}</span>
+							<span class="chip">Status: ${isTBA ? "TBA" : "Ready"}</span>
+						</div>
+						<div class="price">
+							${escapeHtml(harga || "-")}
+							${isTBA ? `<small>(hubungi admin)</small>` : ``}
+						</div>
+					</div>
+				`;
+			}).join("");
+		}
+
+		function escapeHtml(str){
+			return (str ?? "").toString()
+				.replaceAll("&","&amp;")
+				.replaceAll("<","&lt;")
+				.replaceAll(">","&gt;")
+				.replaceAll('"',"&quot;")
+				.replaceAll("'","&#039;");
+		}
+
+		qEl.addEventListener("input", render);
+		sizeEl.addEventListener("change", render);
+		render();
+	</script>
+</body>
+</html>
